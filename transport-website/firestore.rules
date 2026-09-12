@@ -1,0 +1,73 @@
+﻿rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ── Helper functions ──────────────────────────────────────
+    function isSignedIn()       { return request.auth != null; }
+    function isOwner(uid)       { return isSignedIn() && request.auth.uid == uid; }
+    function getRole()          { return get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role; }
+    function isDriver()         { return isSignedIn() && getRole() == 'driver'; }
+    function isFarmer()         { return isSignedIn() && getRole() == 'farmer'; }
+    function notChangingRole()  { return !('role' in request.resource.data) || request.resource.data.role == resource.data.role; }
+
+    // ── users/{uid} ───────────────────────────────────────────
+    // Users can read/write only their own profile.
+    // Role field cannot be changed after creation.
+    match /users/{uid} {
+      allow read:   if isOwner(uid);
+      allow create: if isOwner(uid);
+      allow update: if isOwner(uid) && notChangingRole();
+    }
+
+    // ── drivers/{uid} ─────────────────────────────────────────
+    // Any authenticated user can read driver profiles (for matching).
+    // Only the driver themselves can update their profile.
+    // Farmers cannot modify driver data.
+    match /drivers/{uid} {
+      allow read:   if isSignedIn();
+      allow create: if isOwner(uid);
+      allow update: if isOwner(uid);
+    }
+
+    // ── vehicles/{vehicleId} ──────────────────────────────────
+    // Any authenticated user can read vehicle data.
+    // Only the owner driver can write.
+    match /vehicles/{vehicleId} {
+      allow read:   if isSignedIn();
+      allow create: if isSignedIn() && request.resource.data.driverId == request.auth.uid;
+      allow update: if isSignedIn() && resource.data.driverId == request.auth.uid;
+    }
+
+    // ── transportRequests/{requestId} ─────────────────────────
+    // Farmers create requests. Any signed-in user can read (for drivers to browse).
+    // Drivers can update (to accept). Farmers can update their own (to cancel).
+    // Race-condition protection is enforced by Firestore transactions in client code.
+    match /transportRequests/{requestId} {
+      allow read:   if isSignedIn();
+      allow create: if isSignedIn();   // farmers create via app; enforced in firebase-service.js
+      allow update: if isSignedIn();   // drivers accept via transaction; farmers cancel own
+      allow delete: if isSignedIn() && resource.data.farmerId == request.auth.uid;
+    }
+
+    // ── deliveries/{deliveryId} ───────────────────────────────
+    // Only the assigned driver can create or update a delivery.
+    // The farmer and driver can both read their related delivery.
+    match /deliveries/{deliveryId} {
+      allow read:   if isSignedIn() && (
+                      resource.data.driverId == request.auth.uid ||
+                      resource.data.farmerId == request.auth.uid
+                    );
+      allow create: if isSignedIn() && request.resource.data.driverId == request.auth.uid;
+      allow update: if isSignedIn() && resource.data.driverId == request.auth.uid;
+    }
+
+    // ── notifications/{notificationId} ────────────────────────
+    // Users can only read and update (mark read) their own notifications.
+    match /notifications/{notificationId} {
+      allow read:   if isSignedIn() && resource.data.userId == request.auth.uid;
+      allow create: if isSignedIn();   // service layer creates on behalf of another user
+      allow update: if isSignedIn() && resource.data.userId == request.auth.uid
+                      && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['read']);
+    }
+  }
+}

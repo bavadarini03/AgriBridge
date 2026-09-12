@@ -1,0 +1,16 @@
+﻿{
+  "rules": {
+    "locations": {
+      "$deliveryId": {
+        ".read":  "auth != null",
+        ".write": "auth != null"
+      }
+    },
+    "deliveryStatus": {
+      "$deliveryId": {
+        ".read":  "auth != null",
+        ".write": "auth != null"
+      }
+    }
+  }
+}
