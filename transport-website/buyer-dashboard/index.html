@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <base href="../" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AgriBridge — Buyer Dashboard</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin />
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="buyer.css" />
+</head>
+<body>
+  <div class="app-shell">
+    <!-- ── Sidebar ──────────────────────────────────────────────── -->
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-logo">
+        <span>Agri<span style="color:#4CAF50;">Bridge</span></span>
+        <span style="font-size:0.65rem;color:#aaa;display:block;margin-top:2px;">Buyer Dashboard</span>
+      </div>
+      <nav class="sidebar-nav">
+        <a href="#dashboard"    class="nav-item active" data-page="dashboard">
+          <span>📊</span><span>Overview</span>
+        </a>
+        <a href="#find-produce" class="nav-item" data-page="find-produce">
+          <span>🌾</span><span>Find Produce</span>
+        </a>
+        <a href="#nearby"       class="nav-item" data-page="nearby">
+          <span>📍</span><span>Nearby Farmers</span>
+        </a>
+        <a href="#orders"       class="nav-item" data-page="orders">
+          <span>📦</span><span>My Orders</span>
+        </a>
+        <a href="#analytics"    class="nav-item" data-page="analytics">
+          <span>📈</span><span>Purchase Analytics</span>
+        </a>
+        <a href="#profile"      class="nav-item" data-page="profile">
+          <span>👤</span><span>Profile</span>
+        </a>
+      </nav>
+      <div class="sidebar-footer">
+        <button class="btn btn-danger btn-sm" id="sidebar-logout-btn" style="width:100%;">Logout</button>
+      </div>
+    </aside>
+
+    <div class="sidebar-overlay" id="sidebar-overlay"></div>
+
+    <!-- ── Main area ─────────────────────────────────────────────── -->
+    <main class="main-area">
+      <header class="topbar">
+        <div class="topbar-left">
+          <button class="mobile-menu-btn" id="sidebar-toggle" type="button">☰</button>
+          <h2 id="page-title">Overview</h2>
+        </div>
+        <div class="topbar-right">
+          <div class="conn-status disconnected" id="connection-status">
+            <span class="conn-dot"></span>
+            <span class="conn-label">Connecting</span>
+          </div>
+          <button class="user-profile" id="profile-menu-btn" type="button">
+            <span class="avatar" id="topbar-avatar-initial">B</span>
+            <span id="topbar-name">Buyer</span>
+          </button>
+          <div class="profile-dropdown" id="profile-dropdown">
+            <a class="dropdown-item" href="#profile" onclick="navigateTo('profile');document.getElementById('profile-dropdown').classList.remove('open');">My Profile</a>
+            <button class="dropdown-item" id="logout-btn" type="button">Logout</button>
+          </div>
+        </div>
+      </header>
+
+      <section class="page-content">
+        <!-- All sections; only one is 'active' at a time -->
+        <section id="page-dashboard"      class="page-section active"></section>
+        <section id="page-find-produce"   class="page-section"></section>
+        <section id="page-nearby"         class="page-section"></section>
+        <section id="page-produce-details" class="page-section"></section>
+        <section id="page-orders"         class="page-section"></section>
+        <section id="page-delivery"       class="page-section"></section>
+        <section id="page-analytics"      class="page-section"></section>
+        <section id="page-profile"        class="page-section"></section>
+      </section>
+    </main>
+  </div>
+
+  <!-- Loading overlay shown until auth resolves -->
+  <div id="auth-loading" style="position:fixed;inset:0;background:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:9999;">
+    <div style="font-size:48px;margin-bottom:16px;">🌾</div>
+    <div style="font-size:1.2rem;font-weight:600;color:#333;">AgriBridge</div>
+    <div style="color:#888;margin-top:8px;">Loading your dashboard...</div>
+  </div>
+
+  <!-- Firebase SDK (compat v9 — same as rest of project) -->
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+
+  <!-- Leaflet -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin></script>
+
+  <!-- Core services (must be first) -->
+  <script src="firebase-config.js"></script>
+  <script src="firebase-service.js"></script>
+  <script src="utils.js"></script>
+
+  <!-- Buyer module (order matters: ai → pages → app) -->
+  <script src="buyer-ai.js"></script>
+  <script src="buyer-pages.js"></script>
+  <script src="buyer-app.js"></script>
+
+  <script>
+    // Hide loading overlay once buyer-app.js has initialized
+    // buyer-app.js calls navigateTo() after auth resolves, at which point we hide the overlay.
+    window._hideAuthLoading = function() {
+      const el = document.getElementById('auth-loading');
+      if (el) el.style.display = 'none';
+    };
+  </script>
+</body>
+</html>

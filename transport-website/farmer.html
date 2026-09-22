@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AgriBridge — Farmer Portal</title>
+    <meta name="description"
+        content="AgriBridge Farmer Portal — Register and login to sell your produce directly to buyers, manage crops, track orders and deliveries." />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap"
+        rel="stylesheet" />
+    <link rel="stylesheet" href="styles.css" />
+    <link rel="stylesheet" href="farmer.css" />
+    <style>
+        .form-error-box {
+            color: #c62828;
+            background: #ffebee;
+            border: 1px solid #ef9a9a;
+            border-radius: 6px;
+            padding: 10px 14px;
+            font-size: 0.875rem;
+            display: none;
+            margin-top: 8px;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
+        @media(max-width:560px) {
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .btn-spinner {
+            display: inline-block;
+            width: 14px;
+            height: 14px;
+            border: 2px solid rgba(255, 255, 255, 0.4);
+            border-top-color: #fff;
+            border-radius: 50%;
+            animation: spin 0.7s linear infinite;
+            vertical-align: middle;
+            margin-right: 6px;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        .field-error {
+            color: #c62828;
+            font-size: 0.8rem;
+            display: none;
+            margin-top: 4px;
+        }
+    </style>
+</head>
+
+<body>
+    <main class="auth-page">
+        <section class="auth-brand" style="background:linear-gradient(145deg,#1B5E20 0%,#2E7D32 60%,#43A047 100%);">
+            <div style="margin-bottom:24px;font-size:48px;">🌱</div>
+            <h1 style="margin-bottom:12px;">AgriBridge Farmer Portal</h1>
+            <p style="opacity:0.9;line-height:1.6;">Sell your produce directly to buyers. No middlemen. Get fair prices
+                and manage your farm business digitally.</p>
+            <ul class="auth-features" style="margin-top:24px;list-style:none;padding:0;">
+                <li style="margin-bottom:10px;">✓ Direct farmer-to-buyer sales</li>
+                <li style="margin-bottom:10px;">✓ AI-powered market price recommendations</li>
+                <li style="margin-bottom:10px;">✓ Integrated transport & delivery tracking</li>
+                <li style="margin-bottom:10px;">✓ Real-time order management</li>
+            </ul>
+            <div
+                style="margin-top:32px;padding:16px;background:rgba(255,255,255,0.1);border-radius:10px;font-size:0.85rem;opacity:0.9;">
+                <strong>SIH 2024 — PS 26033</strong><br>
+                Eliminating intermediaries to improve farmer earnings & reduce buyer costs.
+            </div>
+        </section>
+
+        <section class="auth-form-panel">
+            <div class="auth-card" style="max-width:480px;">
+                <div class="auth-header">
+                    <h2>Farmer Access</h2>
+                    <p style="color:#666;font-size:0.9rem;">Sign in or register to manage your farm produce and orders.
+                    </p>
+                </div>
+
+                <div class="auth-tabs">
+                    <button class="auth-tab active" data-tab="login" type="button">Login</button>
+                    <button class="auth-tab" data-tab="register" type="button">Register as Farmer</button>
+                </div>
+
+                <!-- LOGIN PANEL -->
+                <div id="panel-login" class="auth-panel active">
+                    <form id="farmer-login-form" novalidate>
+                        <div class="form-group">
+                            <label class="form-label" for="login-email">Email Address</label>
+                            <input class="form-input" id="login-email" type="email" autocomplete="email"
+                                placeholder="farmer@example.com" required />
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="login-password">Password</label>
+                            <input class="form-input" id="login-password" type="password"
+                                autocomplete="current-password" placeholder="Enter your password" required />
+                        </div>
+                        <div id="login-error" class="form-error-box"></div>
+                        <button class="btn btn-primary btn-full" id="login-btn" type="submit">Sign In</button>
+                    </form>
+                </div>
+
+                <!-- REGISTER PANEL -->
+                <div id="panel-register" class="auth-panel">
+                    <form id="farmer-register-form" novalidate>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label" for="reg-name">Full Name *</label>
+                                <input class="form-input" id="reg-name" type="text" autocomplete="name"
+                                    placeholder="Your full name" required />
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label" for="reg-phone">Phone Number *</label>
+                                <input class="form-input" id="reg-phone" type="tel" autocomplete="tel"
+                                    placeholder="9876543210" required />
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label" for="reg-email">Email *</label>
+                                <input class="form-input" id="reg-email" type="email" autocomplete="email"
+                                    placeholder="farmer@example.com" required />
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label" for="reg-password">Password *</label>
+                                <input class="form-input" id="reg-password" type="password"
+                                    placeholder="Min 6 characters" required />
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label" for="reg-confirm-password">Confirm Password *</label>
+                                <input class="form-input" id="reg-confirm-password" type="password"
+                                    placeholder="Re-enter password" required />
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label" for="reg-farm-location">Farm Location *</label>
+                                <input class="form-input" id="reg-farm-location" type="text"
+                                    placeholder="e.g. Near Periyar Dam" required />
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label" for="reg-village">Village / Town</label>
+                                <input class="form-input" id="reg-village" type="text" placeholder="Cumbum" />
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label" for="reg-district">District</label>
+                                <input class="form-input" id="reg-district" type="text" placeholder="Theni" />
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label" for="reg-state">State</label>
+                                <input class="form-input" id="reg-state" type="text" value="Tamil Nadu" />
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label" for="reg-farm-size">Farm Size (acres)</label>
+                                <input class="form-input" id="reg-farm-size" type="number" min="0.1" step="0.1"
+                                    placeholder="5" />
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="reg-main-crops">Main Crops (comma separated)</label>
+                            <input class="form-input" id="reg-main-crops" type="text"
+                                placeholder="Tomato, Onion, Banana" />
+                        </div>
+                        <div id="register-error" class="form-error-box"></div>
+                        <button class="btn btn-primary btn-full" id="register-btn" type="submit">Register as
+                            Farmer</button>
+                    </form>
+                </div>
+
+                <div style="margin-top:16px;text-align:center;font-size:0.8rem;color:#999;">
+                    Are you a Buyer? <a href="buyer.html" style="color:#2E7D32;">Buyer Portal →</a>
+                    &nbsp;|&nbsp;
+                    Transport Driver? <a href="index.html" style="color:#2E7D32;">Driver Portal →</a>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Firebase SDK (same version as rest of project) -->
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+
+    <!-- Config (initializes firebase) -->
+    <script src="firebase-config.js"></script>
+    <script src="firebase-service.js"></script>
+    <script src="utils.js"></script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // ── Auth state check: if already logged in as farmer, redirect ──
+            firebase.auth().onAuthStateChanged(async (user) => {
+                if (!user) return;
+                try {
+                    const farmerDoc = await firebase.firestore().collection('farmers').doc(user.uid).get();
+                    if (farmerDoc.exists && farmerDoc.data().role === 'farmer') {
+                        window.location.href = 'farmer-dashboard.html';
+                    }
+                } catch (e) { /* ignore */ }
+            });
+
+            // ── Tab switching ──
+            document.querySelectorAll('.auth-tab').forEach(tab => {
+                tab.addEventListener('click', () => {
+                    document.querySelectorAll('.auth-tab').forEach(t => t.classList.remove('active'));
+                    document.querySelectorAll('.auth-panel').forEach(p => p.classList.remove('active'));
+                    tab.classList.add('active');
+                    document.getElementById('panel-' + tab.dataset.tab)?.classList.add('active');
+                    document.getElementById('login-error').style.display = 'none';
+                    document.getElementById('register-error').style.display = 'none';
+                });
+            });
+
+            // ── LOGIN ──
+            document.getElementById('farmer-login-form').addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const email = document.getElementById('login-email').value.trim();
+                const pass = document.getElementById('login-password').value;
+                const errBox = document.getElementById('login-error');
+                const btn = document.getElementById('login-btn');
+                errBox.style.display = 'none';
+
+                if (!email || !pass) {
+                    errBox.textContent = 'Please enter your email and password.';
+                    errBox.style.display = 'block';
+                    return;
+                }
+
+                btn.disabled = true;
+                btn.innerHTML = '<span class="btn-spinner"></span> Signing in...';
+
+                try {
+                    const credential = await firebase.auth().signInWithEmailAndPassword(email, pass);
+                    const uid = credential.user.uid;
+
+                    // Check user role from farmers or users collection
+                    let farmerData = null;
+                    try {
+                        const fDoc = await firebase.firestore().collection('farmers').doc(uid).get();
+                        if (fDoc.exists) farmerData = fDoc.data();
+                    } catch (e) { }
+
+                    if (!farmerData) {
+                        const uDoc = await firebase.firestore().collection('users').doc(uid).get();
+                        if (uDoc.exists && uDoc.data().role === 'farmer') {
+                            farmerData = uDoc.data();
+                        }
+                    }
+
+                    if (!farmerData || farmerData.role !== 'farmer') {
+                        await firebase.auth().signOut();
+                        errBox.textContent = 'This account is not registered as a farmer. Please use the correct portal.';
+                        errBox.style.display = 'block';
+                        return;
+                    }
+                    window.location.href = 'farmer-dashboard.html';
+                } catch (err) {
+                    let msg = err.message;
+                    if (err.code === 'auth/user-not-found' || err.code === 'auth/wrong-password' || err.code === 'auth/invalid-credential') {
+                        msg = 'Incorrect email or password.';
+                    } else if (err.code === 'auth/too-many-requests') {
+                        msg = 'Too many failed attempts. Please try again later.';
+                    }
+                    errBox.textContent = msg;
+                    errBox.style.display = 'block';
+                } finally {
+                    btn.disabled = false;
+                    btn.textContent = 'Sign In';
+                }
+            });
+
+            // ── REGISTER ──
+            document.getElementById('farmer-register-form').addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const name = document.getElementById('reg-name').value.trim();
+                const email = document.getElementById('reg-email').value.trim();
+                const phone = document.getElementById('reg-phone').value.trim();
+                const password = document.getElementById('reg-password').value;
+                const confirmP = document.getElementById('reg-confirm-password').value;
+                const farmLocation = document.getElementById('reg-farm-location').value.trim();
+                const village = document.getElementById('reg-village').value.trim();
+                const district = document.getElementById('reg-district').value.trim();
+                const state = document.getElementById('reg-state').value.trim();
+                const farmSize = document.getElementById('reg-farm-size').value.trim();
+                const mainCrops = document.getElementById('reg-main-crops').value.trim();
+
+                const errBox = document.getElementById('register-error');
+                const btn = document.getElementById('register-btn');
+                errBox.style.display = 'none';
+
+                if (!name) { showErr(errBox, 'Full name is required.'); return; }
+                if (!email) { showErr(errBox, 'Email is required.'); return; }
+                if (!phone) { showErr(errBox, 'Phone number is required.'); return; }
+                if (!farmLocation) { showErr(errBox, 'Farm location is required.'); return; }
+                if (!password || password.length < 6) { showErr(errBox, 'Password must be at least 6 characters.'); return; }
+                if (password !== confirmP) { showErr(errBox, 'Passwords do not match.'); return; }
+
+                btn.disabled = true;
+                btn.innerHTML = '<span class="btn-spinner"></span> Creating account...';
+
+                try {
+                    const credential = await firebase.auth().createUserWithEmailAndPassword(email, password);
+                    const uid = credential.user.uid;
+                    const db = firebase.firestore();
+                    const now = firebase.firestore.FieldValue.serverTimestamp();
+
+                    // Create user profile (shared users collection)
+                    await db.collection('users').doc(uid).set({
+                        uid, name, email, phone, role: 'farmer',
+                        farmLocation, village, district, state: state || 'Tamil Nadu',
+                        farmSize: parseFloat(farmSize) || 0,
+                        mainCrops: mainCrops ? mainCrops.split(',').map(c => c.trim()).filter(Boolean) : [],
+                        createdAt: now
+                    });
+
+                    // Create farmer profile (attempt farmers collection write)
+                    try {
+                        await db.collection('farmers').doc(uid).set({
+                            uid, role: 'farmer', name, email, phone,
+                            farmLocation, village, district, state: state || 'Tamil Nadu',
+                            farmSize: parseFloat(farmSize) || 0,
+                            mainCrops: mainCrops ? mainCrops.split(',').map(c => c.trim()).filter(Boolean) : [],
+                            latitude: null, longitude: null,
+                            createdAt: now, updatedAt: now
+                        });
+                    } catch (fErr) {
+                        console.warn('farmers collection write warning:', fErr);
+                    }
+
+                    window.location.href = 'farmer-dashboard.html';
+                } catch (err) {
+                    let msg = err.message;
+                    if (err.code === 'auth/email-already-in-use') {
+                        msg = 'This email is already registered. Please login instead.';
+                    } else if (err.code === 'auth/invalid-email') {
+                        msg = 'Please enter a valid email address.';
+                    }
+                    showErr(errBox, msg);
+                } finally {
+                    btn.disabled = false;
+                    btn.textContent = 'Register as Farmer';
+                }
+            });
+
+            function showErr(el, msg) {
+                el.textContent = msg;
+                el.style.display = 'block';
+            }
+        });
+    </script>
+</body>
+
+</html>

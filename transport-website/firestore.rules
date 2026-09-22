@@ -1,0 +1,105 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ── Helper functions ──────────────────────────────────────
+    function isSignedIn()       { return request.auth != null; }
+    function isOwner(uid)       { return isSignedIn() && request.auth.uid == uid; }
+    function getRole()          { return get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role; }
+    function isDriver()         { return isSignedIn() && (
+                                    exists(/databases/$(database)/documents/drivers/$(request.auth.uid)) ||
+                                    (exists(/databases/$(database)/documents/users/$(request.auth.uid)) && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'driver')
+                                  ); }
+    function isFarmer()         { return isSignedIn() && (
+                                    exists(/databases/$(database)/documents/users/$(request.auth.uid)) && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'farmer'
+                                  ); }
+    function notChangingRole()  { return !('role' in request.resource.data) || request.resource.data.role == resource.data.role; }
+
+    // ── buyers/{uid} ──────────────────────────────────────────
+    match /buyers/{uid} {
+      allow read:   if isSignedIn();
+      allow create: if isOwner(uid);
+      allow update: if isOwner(uid);
+      allow delete: if isOwner(uid);
+    }
+
+    // ── farmers/{uid} ─────────────────────────────────────────
+    match /farmers/{uid} {
+      allow read:   if isSignedIn();
+      allow create: if isOwner(uid);
+      allow update: if isOwner(uid);
+      allow delete: if isOwner(uid);
+    }
+
+    // ── users/{uid} ───────────────────────────────────────────
+    match /users/{uid} {
+      allow read:   if isSignedIn();
+      allow create: if isOwner(uid);
+      allow update: if isOwner(uid) && notChangingRole();
+    }
+
+    // ── drivers/{uid} ─────────────────────────────────────────
+    match /drivers/{uid} {
+      allow read:   if isSignedIn();
+      allow create: if isOwner(uid);
+      allow update: if isOwner(uid);
+    }
+
+    // ── vehicles/{vehicleId} ──────────────────────────────────
+    match /vehicles/{vehicleId} {
+      allow read:   if isSignedIn();
+      allow create: if isSignedIn() && request.resource.data.driverId == request.auth.uid;
+      allow update: if isSignedIn() && resource.data.driverId == request.auth.uid;
+    }
+
+    // ── transportRequests/{requestId} ─────────────────────────
+    match /transportRequests/{requestId} {
+      allow read:   if isSignedIn();
+      allow create: if isSignedIn();
+      allow update: if isSignedIn();
+      allow delete: if isSignedIn() && resource.data.farmerId == request.auth.uid;
+    }
+
+    // ── deliveries/{deliveryId} ───────────────────────────────
+    match /deliveries/{deliveryId} {
+      allow read:   if isSignedIn();
+      allow create: if isSignedIn() && request.resource.data.driverId == request.auth.uid;
+      allow update: if isSignedIn() && resource.data.driverId == request.auth.uid;
+    }
+
+    // ── notifications/{notificationId} ────────────────────────
+    match /notifications/{notificationId} {
+      allow read:   if isSignedIn() && resource.data.userId == request.auth.uid;
+      allow create: if isSignedIn();
+      allow update: if isSignedIn() && resource.data.userId == request.auth.uid
+                      && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['read']);
+    }
+
+    // ── crops/{cropId} ────────────────────────────────────────
+    match /crops/{cropId} {
+      allow read:   if isSignedIn();
+      allow create: if isSignedIn() && request.resource.data.farmerId == request.auth.uid;
+      allow update: if isSignedIn() && resource.data.farmerId == request.auth.uid;
+      allow delete: if isSignedIn() && resource.data.farmerId == request.auth.uid;
+    }
+
+    // ── orders/{orderId} ──────────────────────────────────────
+    match /orders/{orderId} {
+      allow read:   if isSignedIn();
+      allow create: if isSignedIn() && request.resource.data.buyerId == request.auth.uid;
+      allow update: if isSignedIn() && (
+                      (resource.data.farmerId == request.auth.uid &&
+                       request.resource.data.buyerId == resource.data.buyerId &&
+                       request.resource.data.farmerId == resource.data.farmerId) ||
+                      (resource.data.buyerId == request.auth.uid &&
+                       request.resource.data.buyerId == resource.data.buyerId &&
+                       request.resource.data.farmerId == resource.data.farmerId &&
+                       request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status', 'updatedAt']) &&
+                        request.resource.data.status in ['CANCELLED', 'DELIVERED', 'COMPLETED']) ||
+                      ('driverId' in request.resource.data && request.resource.data.driverId == request.auth.uid) ||
+                      ('driverId' in resource.data && resource.data.driverId == request.auth.uid) ||
+                      isDriver()
+                    );
+    }
+  }
+}
